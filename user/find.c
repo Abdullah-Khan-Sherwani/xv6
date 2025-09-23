@@ -1,10 +1,10 @@
-// IAT OS Clutch
+// IAT OS Clutch by King Khan Sherwani
 #include "kernel/types.h"
 #include "kernel/stat.h"
 #include "kernel/fs.h"
 #include "kernel/fcntl.h"
 #include "kernel/param.h"   
-#include "user/user.h"
+#include "user/user.h" // must look into this
 
 static int has_exec;              
 static char *execv_base[MAXARG]; 
@@ -100,6 +100,7 @@ static void find(const char *path, const char *target)
   close(fd);
 }
 
+// I walk a lonely road..........
 int main(int argc, char *argv[])
 {
   if (argc < 3) {
