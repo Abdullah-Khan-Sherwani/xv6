@@ -3,6 +3,7 @@
 #include "kernel/types.h"
 #include "user/user.h"
 #include "kernel/fcntl.h"
+#include "kernel/stat.h"
 
 // Parsed command representation
 #define EXEC  1
@@ -12,6 +13,8 @@
 #define BACK  5
 
 #define MAXARGS 10
+
+static int g_interactive = 0; // Whether the shell is running interactively
 
 struct cmd {
   int type;
@@ -134,7 +137,11 @@ runcmd(struct cmd *cmd)
 int
 getcmd(char *buf, int nbuf)
 {
-  write(2, "$ ", 2);
+  if (g_interactive) {
+    write(2, "卐 ", 2);
+  }
+
+  // write(2, "$ ", 2);
   memset(buf, 0, nbuf);
   gets(buf, nbuf);
   if(buf[0] == 0) // EOF
@@ -154,6 +161,15 @@ main(void)
       close(fd);
       break;
     }
+  }
+
+  // To detect whether we are running interactively; hide '$' 
+  // or other symbols otherwise
+  struct stat st;
+  if (fstat(0, &st) == 0 && st.type == T_DEVICE) {
+    g_interactive = 1;
+  } else {
+    g_interactive = 0;
   }
 
   // Read and run input commands.
