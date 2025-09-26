@@ -126,14 +126,6 @@ runcmd(struct cmd *cmd)
     if(ecmd->argv[0] == 0)
       exit(1);
 
-    // Stuff for wait command
-    // if (ecmd->argv[0][0]=='w' && ecmd->argv[0][1]=='a' &&
-    //     ecmd->argv[0][2]=='i' && ecmd->argv[0][3]=='t' &&
-    //     ecmd->argv[0][4]==0) {         // exact "wait"
-    //   while (wait(0) >= 0) ;           // reap all children
-    //   exit(0);                         // done with this command
-    // }
-
     exec(ecmd->argv[0], ecmd->argv);
     fprintf(2, "exec %s failed\n", ecmd->argv[0]);
     break;
@@ -311,7 +303,7 @@ complete(char *buf, int *len) {
     char name[DIRSIZ+1];
     de_name_to_cstr(name, de.name);
 
-    // skip "." and ".."
+    // skip . and ..
     if (name[0]=='.' && (name[1]==0 || (name[1]=='.' && name[2]==0)))
       continue;
 
@@ -338,7 +330,7 @@ complete(char *buf, int *len) {
     return;
   }
 
-  // multiple matches: extend by LCP; if no extension possible, list + redraw
+  // multiple matche extend by LCP; if no extension possible list + redraw
   int lcp = lcp_len(matches, m);
   if (lcp > plen) {
     char tmp[DIRSIZ+1];
@@ -349,7 +341,7 @@ complete(char *buf, int *len) {
     return;
   }
 
-  // ambiguous and no progress -> print choices, then redraw
+  // ambiguous 
   write(1, "\n", 1);
   for (int i=0; i<m; i++) {
     write(1, matches[i], strlen(matches[i]));
@@ -415,12 +407,6 @@ main(void)
       if(chdir(cmd+3) < 0)
         fprintf(2, "cannot cd %s\n", cmd+3);
     } else {
-      // wait command
-      // if (is_cmd(cmd, "wait") == 0) {
-      //   while(wait(0) >= 0) ;
-      //   continue;
-      // }
-      
       // Skip leading spaces/tabs
       char *p = cmd;
       while (*p == ' ' || *p == '\t') p++;
@@ -431,7 +417,7 @@ main(void)
         while (p[i] == ' ' || p[i] == '\t') i++;
         if (p[i] == '\n' || p[i] == '\0') {
           while (wait(0) >= 0) ;   
-          continue;                 // don't fork/exec
+          continue;                 
         }
       }
       
@@ -439,24 +425,19 @@ main(void)
       struct cmd *t = parsecmd(cmd);
 
       if (t->type == BACK) {
-        // Background: fork once; child runs the subcommand; parent does NOT wait.
+        // Background
         if (fork1() == 0) {
           struct backcmd *bc = (struct backcmd*)t;
-          runcmd(bc->cmd);   // never returns
+          runcmd(bc->cmd);   
         }
         // Parent: return to prompt immediately.
         continue;
       } else {
-        // Foreground: standard fork/exec + wait.
+        // Foreground
         if (fork1() == 0)
-          runcmd(t);         // never returns
+          runcmd(t);         
         wait(0);
       }
-      // ======================================================================
-
-      // if(fork1() == 0)
-      //   runcmd(parsecmd(cmd));
-      // wait(0);
     }
   }
   exit(0);
