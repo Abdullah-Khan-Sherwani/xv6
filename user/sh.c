@@ -126,12 +126,12 @@ runcmd(struct cmd *cmd)
       exit(1);
 
     // Stuff for wait command
-    if (ecmd->argv[0][0]=='w' && ecmd->argv[0][1]=='a' &&
-        ecmd->argv[0][2]=='i' && ecmd->argv[0][3]=='t' &&
-        ecmd->argv[0][4]==0) {         // exact "wait"
-      while (wait(0) >= 0) ;           // reap all children
-      exit(0);                         // done with this command
-    }
+    // if (ecmd->argv[0][0]=='w' && ecmd->argv[0][1]=='a' &&
+    //     ecmd->argv[0][2]=='i' && ecmd->argv[0][3]=='t' &&
+    //     ecmd->argv[0][4]==0) {         // exact "wait"
+    //   while (wait(0) >= 0) ;           // reap all children
+    //   exit(0);                         // done with this command
+    // }
 
     exec(ecmd->argv[0], ecmd->argv);
     fprintf(2, "exec %s failed\n", ecmd->argv[0]);
@@ -413,14 +413,14 @@ main(void)
       while (*p == ' ' || *p == '\t') p++;
 
       // Accept "wait" optionally followed by spaces/tabs and ending with '\n' or '\0'
-      if (p[0]=='w' && p[1]=='a' && p[2]=='i' && p[3]=='t') {
-        int i = 4;
-        while (p[i] == ' ' || p[i] == '\t') i++;
-        if (p[i] == '\n' || p[i] == '\0') {
-          while (wait(0) >= 0) ;   // reap all children
-          continue;                 // don't fork/exec
-        }
-      }
+      // if (p[0]=='w' && p[1]=='a' && p[2]=='i' && p[3]=='t') {
+      //   int i = 4;
+      //   while (p[i] == ' ' || p[i] == '\t') i++;
+      //   if (p[i] == '\n' || p[i] == '\0') {
+      //     while (wait(0) >= 0) ;   // reap all children
+      //     continue;                 // don't fork/exec
+      //   }
+      // }
       
       if(fork1() == 0)
         runcmd(parsecmd(cmd));
