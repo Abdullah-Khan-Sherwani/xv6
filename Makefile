@@ -199,6 +199,7 @@ UPROGS=\
 	$U/_memdump\
 	$U/_find\
 	$U/_uptime\
+	$U/_history\
 	$U/_dorphan\
 
 

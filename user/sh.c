@@ -17,6 +17,7 @@
 
 static int g_interactive = 0; // Whether the shell is running interactively
 static char *prompt = "$ ";
+static int histfd = -1;
 
 static int readline(char *buf, int max);
 static void complete(char *buf, int *len);
@@ -126,12 +127,12 @@ runcmd(struct cmd *cmd)
       exit(1);
 
     // Stuff for wait command
-    // if (ecmd->argv[0][0]=='w' && ecmd->argv[0][1]=='a' &&
-    //     ecmd->argv[0][2]=='i' && ecmd->argv[0][3]=='t' &&
-    //     ecmd->argv[0][4]==0) {         // exact "wait"
-    //   while (wait(0) >= 0) ;           // reap all children
-    //   exit(0);                         // done with this command
-    // }
+    if (ecmd->argv[0][0]=='w' && ecmd->argv[0][1]=='a' &&
+        ecmd->argv[0][2]=='i' && ecmd->argv[0][3]=='t' &&
+        ecmd->argv[0][4]==0) {         // exact "wait"
+      while (wait(0) >= 0) ;           // reap all children
+      exit(0);                         // done with this command
+    }
 
     exec(ecmd->argv[0], ecmd->argv);
     fprintf(2, "exec %s failed\n", ecmd->argv[0]);
@@ -378,6 +379,12 @@ main(void)
   struct stat st;
   if (fstat(0, &st) == 0 && st.type == T_DEVICE) {
     g_interactive = 1;
+    histfd = open("sh_history", O_CREATE | O_RDWR);
+    if (histfd >= 0) {
+      // advance the file offset to EOF once; keep fd open afterwards
+      char sink[128];
+      while (read(histfd, sink, sizeof sink) > 0) { /* nothing */ }
+    }
   } else {
     g_interactive = 0;
   }
@@ -392,12 +399,19 @@ main(void)
     while (*cmd == ' ' || *cmd == '\t')
       cmd++;
 
-    if (*cmd == '\n') // is a blank command
-      continue;
+    // if (*cmd == '\n') // is a blank command
+    //  continue;
+    if (*cmd == 0) continue;  // truly empty after trimming spaces
+
+    // append to history
+    if (histfd >= 0) {
+      write(histfd, cmd, strlen(cmd));
+      write(histfd, "\n", 1);   // add newline for readability
+    }
 
     if(cmd[0] == 'c' && cmd[1] == 'd' && cmd[2] == ' '){
       // Chdir must be called by the parent, not the child.
-      cmd[strlen(cmd)-1] = 0;  // chop \n
+      // cmd[strlen(cmd)-1] = 0;  // chop \n
       if(chdir(cmd+3) < 0)
         fprintf(2, "cannot cd %s\n", cmd+3);
     } else {
@@ -413,14 +427,14 @@ main(void)
       while (*p == ' ' || *p == '\t') p++;
 
       // Accept "wait" optionally followed by spaces/tabs and ending with '\n' or '\0'
-      // if (p[0]=='w' && p[1]=='a' && p[2]=='i' && p[3]=='t') {
-      //   int i = 4;
-      //   while (p[i] == ' ' || p[i] == '\t') i++;
-      //   if (p[i] == '\n' || p[i] == '\0') {
-      //     while (wait(0) >= 0) ;   // reap all children
-      //     continue;                 // don't fork/exec
-      //   }
-      // }
+      if (p[0]=='w' && p[1]=='a' && p[2]=='i' && p[3]=='t') {
+        int i = 4;
+        while (p[i] == ' ' || p[i] == '\t') i++;
+        if (p[i] == '\n' || p[i] == '\0') {
+          while (wait(0) >= 0) ;   // reap all children
+          continue;                 // don't fork/exec
+        }
+      }
       
       if(fork1() == 0)
         runcmd(parsecmd(cmd));
