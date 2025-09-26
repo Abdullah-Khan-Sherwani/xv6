@@ -57,6 +57,42 @@ void panic(char*);
 struct cmd *parsecmd(char*);
 void runcmd(struct cmd*) __attribute__((noreturn));
 
+// Zuhair Merchant 
+static void
+Paleoloxodon(void)
+{
+  static const char *art =
+  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⣤⣤⣄⣀⣀⠀⠀⠀⠀⠀⠐⠁⠀⠀⠀⠀⠁⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣤⠞⠉⠀⠀⠀⠀⠀⠉⠉⠉⠉⠑⣦⣀⣄⣀⠀⠑⢀⣀⣀⣀⣤⣴⣤⣤⣤⣀⡀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣰⠟⠀⠀⠀⠀⠀⠀⠀⢆⠀⠀⢀⠴⠋⠁⠈⢀⠙⢉⠓⠺⠧⠀⠀⠀⠀⠀⠀⠀⠈⠙⠛⠶⣄⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⠀⠀⠀⠀⢀⡼⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⢣⡀⠀⠀⠀⠀⠈⠀⠀⠁⠀⠰⠀⠀⠀⠀⣠⠀⠀⠀⠀⠀⠀⠀⠘⢷⡀⠀⠀\n"
+  "⠀⠀⠀⠀⠀⠀⠀⠀⣾⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠘⣿⣆⠀⠀⠀⠀⠀⠀⠀⠀⠁⠀⠀⢠⠎⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢳⡀⠀\n"
+  "⠀⠀⠀⠀⠀⠀⠀⢠⢿⡄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⠏⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢷⡀\n"
+  "⠀⠀⠀⠀⠀⠀⢠⠏⠀⠻⢦⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⣭⣵⠀⠀⠀⠀⠀⠀⠀⠀⠁⣴⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⡇\n"
+  "⠀⠀⠀⠀⠀⢠⡏⠀⠀⠀⠀⠙⢦⡀⠀⠀⠀⠀⠀⠀⠀⠀⢷⣟⠀⠀⠀⠀⠀⠀⠄⠀⢸⢿⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⡟⠀\n"
+  "⠀⠀⠀⠀⠀⣾⠀⠀⠀⠀⠀⠀⠀⠙⢧⡀⠀⠀⠀⠀⠀⠀⣼⣼⢠⠐⠒⠉⠉⠉⠒⠄⢸⣸⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣠⠶⠋⠀⠀\n"
+  "⠀⠀⠀⠀⢀⡇⠀⢰⠀⠀⠀⠀⠀⠀⠀⢙⢦⡀⠀⠀⠀⠀⣇⡟⠀⡂⠠⡘⠒⠚⠠⠀⢸⡯⠀⠀⠀⠀⠀⠀⣀⣤⠖⠋⠁⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⠘⡇⠀⢸⡀⠀⠀⠀⠀⠀⠀⠈⡇⠙⠳⣤⣀⣠⣿⡣⠀⢏⣤⠬⠤⠤⢄⡐⢐⣿⠀⠀⠀⢀⡤⠞⠁⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⢀⡇⠀⠘⣇⠀⠀⠀⠀⠀⠀⠀⢳⠀⠀⠀⠈⠉⢸⠓⣾⠋⡄⠀⠠⠤⡀⠑⣬⣼⣀⡴⠚⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⢀⡾⣷⠀⠀⢻⡄⠀⠀⠀⠀⠀⠀⠘⣇⠀⠀⠀⠀⣏⡼⠻⣮⠤⠄⢀⠀⠈⣶⢿⡘⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⣸⢳⢻⠀⠀⠈⢷⡀⠀⠀⠀⠀⠀⠀⠸⣄⠀⠀⠀⢹⢂⠠⢳⠠⢒⣀⡀⢸⣿⠁⢳⣽⡢⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⢀⢿⠃⢸⡇⠀⠀⠀⠻⣄⠀⠀⠀⠀⠀⠀⢿⠀⠀⠢⠒⠀⡄⢸⣄⣀⣷⣷⢼⢿⠀⠀⠙⠃⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⣤⣾⢾⡆⠀⡇⠀⠀⠀⠀⣨⣷⣤⣀⡀⠀⠀⠸⣧⠀⢸⠀⠀⠀⠘⣏⢙⣛⡃⢸⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⣸⠁⠀⢠⠇⠀⣿⠀⠀⢠⠊⣼⠈⢧⠉⠛⠛⠶⡶⢻⣿⡳⠀⠀⠀⠀⣿⠋⠉⠁⢸⢸⠀⠀⠀⠠⠄⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠻⣧⣠⠞⠀⠀⣿⠀⠀⠀⢀⡇⠀⠈⡇⠀⠀⠀⢠⡟⠘⡇⠀⠀⠀⠀⣿⡇⠀⠀⢸⣾⡄⠀⠀⠂⠨⠄⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠉⠁⠀⠀⠀⣿⠀⠀⠀⣸⠃⠀⠀⢿⠀⠀⠀⣼⠑⠀⢿⠀⠀⠀⠀⣿⣷⠀⠀⢸⢿⡇⠀⠀⠀⠀⠠⠀⡀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⠀⠀⣿⠀⠀⢠⡏⠀⠀⠀⢸⡇⠀⠀⣿⠀⠀⢸⡆⠀⠀⠀⣿⣿⠀⠀⣼⣸⠇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⠀⠀⡿⠀⠀⢸⠃⠀⠀⠀⢸⠁⠀⠀⢸⡄⠀⠈⡇⠀⠀⠀⢸⣿⠀⠀⣿⠏⠀⠀⠀⠀⠀⠀⠡⠀⠀⢀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⠀⣸⠇⠀⠀⢸⠆⠀⠀⠀⢸⠀⠀⠀⠸⡇⠀⠀⣷⠀⠀⠀⢸⡟⣇⠀⡇⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠓⠆⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⢠⡟⠀⠀⠀⢸⠀⠀⠀⢀⡿⠀⠀⠀⠀⣿⠀⠀⣿⠀⠀⠀⢸⡁⠙⠚⣷⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀\n"
+  "⠀⠀⠀⠀⠻⠦⢤⣤⣤⡼⠇⠀⠀⠘⢧⣀⣀⠀⠀⠘⣷⢠⡇⠀⠀⠀⠈⢧⡤⠴⠟⠀⠀⠀⠀⠀⠀⢠⣤⣤⣤⣤⣤⣶⣶⠀⡄⣤⣄\n"
+  "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⠉⠉⠁⠈⠛⠒⠲⠿⠶⠾⠇⠀⠀⠀⠀⠀⠀⠀⠀⠈⣉⠉⠉⠉⠉⣛⡛⠁⠉⠉⠀\n"
+  "PALEOLOXODON NAMADICUS\n";
+
+  write(1, art, strlen(art));
+}
+
+
 // Execute cmd.  Never returns.
 void
 runcmd(struct cmd *cmd)
@@ -79,6 +115,15 @@ runcmd(struct cmd *cmd)
     ecmd = (struct execcmd*)cmd;
     if(ecmd->argv[0] == 0)
       exit(1);
+
+    // Stuff for wait command
+    if (ecmd->argv[0][0]=='w' && ecmd->argv[0][1]=='a' &&
+        ecmd->argv[0][2]=='i' && ecmd->argv[0][3]=='t' &&
+        ecmd->argv[0][4]==0) {         // exact "wait"
+      while (wait(0) >= 0) ;           // reap all children
+      exit(0);                         // done with this command
+    }
+
     exec(ecmd->argv[0], ecmd->argv);
     fprintf(2, "exec %s failed\n", ecmd->argv[0]);
     break;
@@ -138,7 +183,8 @@ int
 getcmd(char *buf, int nbuf)
 {
   if (g_interactive) {
-    write(2, "卐 ", 2);
+    // write(2, "IAT4LYF> ", 9);
+    write(2, "$ ", 2);
   }
 
   // write(2, "$ ", 2);
@@ -148,6 +194,27 @@ getcmd(char *buf, int nbuf)
     return -1;
   return 0;
 }
+
+// Non-mutating: checks first token equals `name` exactly.
+// static int is_cmd(const char *s, const char *name) {
+//   // skip leading ws
+//   while (*s==' ' || *s=='\t') s++;
+
+//   // compute token end (stop at ws, ';', '&', '|', '\n', or '\0')
+//   const char *p = s;
+//   while (*p && *p!=' ' && *p!='\t' && *p!=';' && *p!='&' && *p!='|' && *p!='\n')
+//     p++;
+
+//   int toklen = p - s;
+//   // exact match
+//   if ((int)strlen(name) != toklen) return 0;
+
+//   // strcmp without including headers: loop compare
+//   for (int i = 0; i < toklen; i++)
+//     if (s[i] != name[i]) return 0;
+
+//   return 1;
+// }
 
 int
 main(void)
@@ -172,19 +239,46 @@ main(void)
     g_interactive = 0;
   }
 
+  int IAT = 0;
+  if (IAT) {Paleoloxodon();} // Sorry Zuhair
+
   // Read and run input commands.
   while(getcmd(buf, sizeof(buf)) >= 0){
     char *cmd = buf;
+
     while (*cmd == ' ' || *cmd == '\t')
       cmd++;
+
     if (*cmd == '\n') // is a blank command
       continue;
+
     if(cmd[0] == 'c' && cmd[1] == 'd' && cmd[2] == ' '){
       // Chdir must be called by the parent, not the child.
       cmd[strlen(cmd)-1] = 0;  // chop \n
       if(chdir(cmd+3) < 0)
         fprintf(2, "cannot cd %s\n", cmd+3);
     } else {
+      // wait command
+      // if (is_cmd(cmd, "wait") == 0) {
+      //   while(wait(0) >= 0) ;
+      //   continue;
+      // }
+      
+      // ---- builtin: wait ----
+      // Skip leading spaces/tabs
+      char *p = cmd;
+      while (*p == ' ' || *p == '\t') p++;
+
+      // Accept "wait" optionally followed by spaces/tabs and ending with '\n' or '\0'
+      if (p[0]=='w' && p[1]=='a' && p[2]=='i' && p[3]=='t') {
+        int i = 4;
+        while (p[i] == ' ' || p[i] == '\t') i++;
+        if (p[i] == '\n' || p[i] == '\0') {
+          while (wait(0) >= 0) ;   // reap all children
+          continue;                 // don't fork/exec
+        }
+      }
+      
       if(fork1() == 0)
         runcmd(parsecmd(cmd));
       wait(0);
