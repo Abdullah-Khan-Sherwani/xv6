@@ -4,6 +4,7 @@
 #include "user/user.h"
 #include "kernel/fcntl.h"
 #include "kernel/stat.h"
+#include "kernel/fs.h"
 
 // Parsed command representation
 #define EXEC  1
@@ -15,6 +16,14 @@
 #define MAXARGS 10
 
 static int g_interactive = 0; // Whether the shell is running interactively
+static char *prompt = "$ ";
+
+static int readline(char *buf, int max);
+static void complete(char *buf, int *len);
+static int  is_sep(int c);
+static void echo_append(char *buf, int *len, const char *s);
+static void de_name_to_cstr(char dst[DIRSIZ+1], const char src[DIRSIZ]);
+static int  is_dir(const char *name);
 
 struct cmd {
   int type;
@@ -179,42 +188,176 @@ runcmd(struct cmd *cmd)
   exit(0);
 }
 
-int
-getcmd(char *buf, int nbuf)
-{
+int getcmd(char *buf, int nbuf) {
   if (g_interactive) {
-    // write(2, "IAT4LYF> ", 9);
-    write(2, "$ ", 2);
-  }
-
-  // write(2, "$ ", 2);
+    write(2, prompt, strlen(prompt));
+  }  
+  
   memset(buf, 0, nbuf);
-  gets(buf, nbuf);
-  if(buf[0] == 0) // EOF
-    return -1;
+  int n = readline(buf, nbuf);
+  if (n < 0) return -1;                  // EOF: exit shell; init respawns it
+  if (buf[0] == 0) return 0;             // blank line reprompt
   return 0;
 }
 
-// Non-mutating: checks first token equals `name` exactly.
-// static int is_cmd(const char *s, const char *name) {
-//   // skip leading ws
-//   while (*s==' ' || *s=='\t') s++;
 
-//   // compute token end (stop at ws, ';', '&', '|', '\n', or '\0')
-//   const char *p = s;
-//   while (*p && *p!=' ' && *p!='\t' && *p!=';' && *p!='&' && *p!='|' && *p!='\n')
-//     p++;
+static int readline(char *buf, int max) {
+  int len = 0;
+  for (;;) {
+    char c;
+    int r = read(0, &c, 1);
+    if (r < 1) {
+      if (len == 0) return -1;  
+      buf[len] = 0;             
+      return len;
+    }
 
-//   int toklen = p - s;
-//   // exact match
-//   if ((int)strlen(name) != toklen) return 0;
+    if (c == '\r' || c == '\n') {
+      buf[len] = 0;
+      return len;
+    }
 
-//   // strcmp without including headers: loop compare
-//   for (int i = 0; i < toklen; i++)
-//     if (s[i] != name[i]) return 0;
+    if (c == 0x08 || c == 0x7f) {
+      if (len) len--;
+      continue;
+    }
 
-//   return 1;
-// }
+    if (c == '\t') {
+      // Do completion and print only the suffix
+      complete(buf, &len);
+      continue;
+    }
+
+    if (c >= 32 && c < 127) {
+      if (len + 1 < max) buf[len++] = c;
+      continue;
+    }
+    // ignore others
+  }
+}
+
+
+// Autocomplete helper functions
+static int
+is_sep(int c) {
+  return c==' ' || c=='\t' || c=='\n' || c=='|' || c==';' || c=='&' || c=='<' || c=='>';
+}
+
+static void
+echo_append(char *buf, int *len, const char *s) {
+  while (*s) {
+    buf[*len] = *s;
+    write(1, s, 1);
+    (*len)++;
+    s++;
+  }
+}
+
+static void
+de_name_to_cstr(char dst[DIRSIZ+1], const char src[DIRSIZ]) {
+  int i = 0;
+  while (i < DIRSIZ && src[i]) { dst[i] = src[i]; i++; }
+  dst[i] = 0;
+}
+
+static int
+is_dir(const char *name) {
+  struct stat st;
+  if (stat((char *)name, &st) < 0) return 0;
+  return st.type == T_DIR;
+}
+
+// Longest common prefix among matches
+static int
+lcp_len(char matches[][DIRSIZ+1], int n) {
+  if (n <= 0) return 0;
+  for (int j = 0; ; j++) {
+    char c = matches[0][j];
+    if (c == 0) return j;
+    for (int i = 1; i < n; i++) {
+      if (matches[i][j] != c) return j;
+    }
+  }
+}
+
+// Tab completion
+static void
+complete(char *buf, int *len) {
+  // 1) find token start (last separator + 1)
+  int t0 = *len;
+  while (t0 > 0 && !is_sep((unsigned char)buf[t0-1])) t0--;
+  int plen = *len - t0;
+  if (plen <= 0) { write(1, "\a", 1); return; }     // nothing to complete
+
+  // 2) prefix string (cap at DIRSIZ)
+  if (plen > DIRSIZ) plen = DIRSIZ;
+  char prefix[DIRSIZ+1];
+  for (int i=0; i<plen; i++) prefix[i] = buf[t0+i];
+  prefix[plen] = 0;
+
+  // 3) scan "." and collect matches
+  int fd = open(".", 0);
+  if (fd < 0) return;
+
+  struct dirent de;
+  char matches[64][DIRSIZ+1];
+  char isdir[64];
+  int m = 0;
+
+  while (read(fd, &de, sizeof(de)) == sizeof(de)) {
+    if (de.inum == 0) continue;
+
+    char name[DIRSIZ+1];
+    de_name_to_cstr(name, de.name);
+
+    // skip "." and ".."
+    if (name[0]=='.' && (name[1]==0 || (name[1]=='.' && name[2]==0)))
+      continue;
+
+    // prefix match
+    int ok = 1;
+    for (int i=0; i<plen; i++) { if (name[i] != prefix[i]) { ok = 0; break; } }
+    if (!ok) continue;
+
+    if (m < 64) {
+      int i=0; while (i<=DIRSIZ) { matches[m][i] = name[i]; i++; }
+      isdir[m] = is_dir(name);
+      m++;
+    }
+  }
+  close(fd);
+
+  if (m == 0) { write(1, "\a", 1); return; }
+
+  if (m == 1) {
+    // single match: append remaining chars; add '/' if directory
+    const char *nm = matches[0];
+    echo_append(buf, len, nm + plen);
+    if (isdir[0]) echo_append(buf, len, "/");
+    return;
+  }
+
+  // multiple matches: extend by LCP; if no extension possible, list + redraw
+  int lcp = lcp_len(matches, m);
+  if (lcp > plen) {
+    char tmp[DIRSIZ+1];
+    int k=0;
+    for (int i=plen; i<lcp; i++) tmp[k++] = matches[0][i];
+    tmp[k] = 0;
+    echo_append(buf, len, tmp);
+    return;
+  }
+
+  // ambiguous and no progress -> print choices, then redraw
+  write(1, "\n", 1);
+  for (int i=0; i<m; i++) {
+    write(1, matches[i], strlen(matches[i]));
+    if (isdir[i]) write(1, "/", 1);
+    write(1, "\n", 1);
+  }
+  if (g_interactive) write(2, prompt, strlen(prompt));   // same prompt guard you already have
+  write(1, buf, *len);                    // restore current line
+}
 
 int
 main(void)
