@@ -6,7 +6,6 @@
 #include "kernel/stat.h"
 #include "kernel/fs.h"
 
-// Parsed command representation
 #define EXEC  1
 #define REDIR 2
 #define PIPE  3
@@ -15,7 +14,7 @@
 
 #define MAXARGS 10
 
-static int g_interactive = 0; // Whether the shell is running interactively
+static int g_interactive = 0; // interactive or not
 static char *prompt = "$ ";
 static int histfd = -1;
 
@@ -188,8 +187,8 @@ int getcmd(char *buf, int nbuf) {
   
   memset(buf, 0, nbuf);
   int n = readline(buf, nbuf);
-  if (n < 0) return -1;                  // EOF: exit shell; init respawns it
-  if (buf[0] == 0) return 0;             // blank line reprompt
+  if (n < 0) return -1;                 
+  if (buf[0] == 0) return 0;             
   return 0;
 }
 
@@ -276,19 +275,19 @@ lcp_len(char matches[][DIRSIZ+1], int n) {
 // Tab completion
 static void
 complete(char *buf, int *len) {
-  // 1) find token start (last separator + 1)
+  // find token start (last separator + 1)
   int t0 = *len;
   while (t0 > 0 && !is_sep((unsigned char)buf[t0-1])) t0--;
   int plen = *len - t0;
-  if (plen <= 0) { write(1, "\a", 1); return; }     // nothing to complete
+  if (plen <= 0) { write(1, "\a", 1); return; }     
 
-  // 2) prefix string (cap at DIRSIZ)
+  // prefix string (cap at DIRSIZ)
   if (plen > DIRSIZ) plen = DIRSIZ;
   char prefix[DIRSIZ+1];
   for (int i=0; i<plen; i++) prefix[i] = buf[t0+i];
   prefix[plen] = 0;
 
-  // 3) scan "." and collect matches
+  // scan "." and collect matches
   int fd = open(".", 0);
   if (fd < 0) return;
 
@@ -323,14 +322,14 @@ complete(char *buf, int *len) {
   if (m == 0) { write(1, "\a", 1); return; }
 
   if (m == 1) {
-    // single match: append remaining chars; add '/' if directory
+    // single match
     const char *nm = matches[0];
     echo_append(buf, len, nm + plen);
     if (isdir[0]) echo_append(buf, len, "/");
     return;
   }
 
-  // multiple matche extend by LCP; if no extension possible list + redraw
+  // multiple match
   int lcp = lcp_len(matches, m);
   if (lcp > plen) {
     char tmp[DIRSIZ+1];
@@ -348,8 +347,8 @@ complete(char *buf, int *len) {
     if (isdir[i]) write(1, "/", 1);
     write(1, "\n", 1);
   }
-  if (g_interactive) write(2, prompt, strlen(prompt));   // same prompt guard you already have
-  write(1, buf, *len);                    // restore current line
+  if (g_interactive) write(2, prompt, strlen(prompt));   
+  write(1, buf, *len);                    
 }
 
 int
@@ -358,7 +357,7 @@ main(void)
   static char buf[100];
   int fd;
 
-  // Ensure that three file descriptors are open.
+  // Ensure three file descriptors are open.
   while((fd = open("console", O_RDWR)) >= 0){
     if(fd >= 3){
       close(fd);
@@ -366,14 +365,11 @@ main(void)
     }
   }
 
-  // To detect whether we are running interactively; hide '$' 
-  // or other symbols otherwise
   struct stat st;
   if (fstat(0, &st) == 0 && st.type == T_DEVICE) {
     g_interactive = 1;
     histfd = open("sh_history", O_CREATE | O_RDWR);
     if (histfd >= 0) {
-      // advance the file offset to EOF once; keep fd open afterwards
       char sink[128];
       while (read(histfd, sink, sizeof sink) > 0) { /* nothing */ }
     }
@@ -390,28 +386,21 @@ main(void)
 
     while (*cmd == ' ' || *cmd == '\t')
       cmd++;
-
-    // if (*cmd == '\n') // is a blank command
-    //  continue;
-    if (*cmd == 0) continue;  // truly empty after trimming spaces
+    if (*cmd == 0) continue;  
 
     // append to history
     if (histfd >= 0) {
       write(histfd, cmd, strlen(cmd));
-      write(histfd, "\n", 1);   // add newline for readability
+      write(histfd, "\n", 1);  
     }
 
     if(cmd[0] == 'c' && cmd[1] == 'd' && cmd[2] == ' '){
-      // Chdir must be called by the parent, not the child.
-      // cmd[strlen(cmd)-1] = 0;  // chop \n
       if(chdir(cmd+3) < 0)
         fprintf(2, "cannot cd %s\n", cmd+3);
     } else {
-      // Skip leading spaces/tabs
       char *p = cmd;
       while (*p == ' ' || *p == '\t') p++;
 
-      // Accept "wait"
       if (p[0]=='w' && p[1]=='a' && p[2]=='i' && p[3]=='t') {
         int i = 4;
         while (p[i] == ' ' || p[i] == '\t') i++;
@@ -421,7 +410,6 @@ main(void)
         }
       }
       
-      //TOP-LEVEL BACK HANDLING for wait
       struct cmd *t = parsecmd(cmd);
 
       if (t->type == BACK) {
@@ -430,7 +418,6 @@ main(void)
           struct backcmd *bc = (struct backcmd*)t;
           runcmd(bc->cmd);   
         }
-        // Parent: return to prompt immediately.
         continue;
       } else {
         // Foreground
