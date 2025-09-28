@@ -40,7 +40,7 @@ int main(int argc, char *argv[])
     char buf[1];
     char numbuf[32];
     int pos = 0;
-    int ready = 1; // start-of-file is a separator, so ready to start numbers
+    int ready = 1; 
 
     while (read(fd, buf, 1) == 1) {
       char c = buf[0];
@@ -50,9 +50,8 @@ int main(int argc, char *argv[])
           if (pos < (int)sizeof(numbuf) - 1) {
             numbuf[pos++] = c;
           }
-          // if buffer overflows, we stil stay in number; excess digits ignored
         } else {
-          // We are inside a non-separator word; ignore digits like the '6' in "xv6"
+          // ignore digits like the '6' in "xv6"
         }
       } else if (is_sep(c)) {
         if (pos > 0) {
@@ -65,7 +64,6 @@ int main(int argc, char *argv[])
         }
         ready = 1; 
       } else {
-        // Non-separator, non-digit 
         pos = 0;
         ready = 0; 
       }

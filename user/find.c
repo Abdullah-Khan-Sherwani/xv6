@@ -6,7 +6,6 @@
 #include "kernel/param.h"
 #include "user/user.h"
 
-// -------- Globals --------
 static int has_exec;
 static char *execv_base[MAXARG];
 static int execv_basec;
@@ -14,8 +13,6 @@ static int execv_basec;
 // 0 = literal strcmp (default), 1 = regex (^ . * $ only)
 static int g_use_regex = 0;
 
-// -------- K&P mini-regex (xv6 grep.c) --------
-// Make these static to avoid any symbol noise.
 static int matchhere(char*, char*);
 static int matchstar(int, char*, char*);
 
@@ -50,7 +47,6 @@ matchstar(int c, char *re, char *text)
   } while(*text!='\0' && (*text++==c || c=='.'));
   return 0;
 }
-// ---------------------------------------------
 
 static void
 run_exec_on(const char *filepath)
@@ -162,7 +158,7 @@ main(int argc, char *argv[])
       g_use_regex = 1;
       if (i + 1 < argc && argv[i+1][0] != '-') {
         target = argv[i+1];
-        i++;            // consume pattern token after -E
+        i++;            
       }
       continue;
     }
@@ -171,7 +167,7 @@ main(int argc, char *argv[])
       g_use_regex = 0;
       if (i + 1 < argc && argv[i+1][0] != '-') {
         target = argv[i+1];
-        i++;            // consume literal token after -F
+        i++;            
       }
       continue;
     }
@@ -185,15 +181,12 @@ main(int argc, char *argv[])
       for (int j = i + 1; j < argc && execv_basec < MAXARG - 1; j++)
         execv_base[execv_basec++] = argv[j];
       execv_base[execv_basec] = 0;
-      // done parsing; -exec eats the rest
       break;
     }
 
-    // Non-flag token: set target if not yet set
     if (!target) {
       target = argv[i];
     } else {
-      // Extra non-flag before -exec -> keep behavior simple
       fprintf(2, "usage: find <start-path> <name|pattern> [-E | -F] [-exec <cmd> [args...]]\n");
       exit(1);
     }
