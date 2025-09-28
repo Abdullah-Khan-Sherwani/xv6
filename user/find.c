@@ -20,7 +20,7 @@ static void run_exec_on(const char *filepath)
     argv[ac++] = execv_base[i];
 
   if (ac < MAXARG - 1)
-    argv[ac++] = (char *)filepath;   // append matched path as final arg
+    argv[ac++] = (char *)filepath;  
   argv[ac] = 0;
 
   int pid = fork();
@@ -31,7 +31,6 @@ static void run_exec_on(const char *filepath)
   if (pid == 0) {
     // child: exec
     exec(argv[0], argv);
-    // if exec returns error
     fprintf(2, "find: exec %s failed\n", argv[0]);
     exit(1);
   }
@@ -55,7 +54,6 @@ static void find(const char *path, const char *target)
   }
 
   if (st.type == T_FILE) {
-    // compare basename(path) with target
     const char *base = path;
     for (const char *p = path; *p; p++) if (*p == '/') base = p + 1;
 
@@ -67,7 +65,6 @@ static void find(const char *path, const char *target)
       }
     }
   } else if (st.type == T_DIR) {
-    // iterate directory
     char buf[512];
     int n = strlen((char *)path);
     if (n + 1 + DIRSIZ + 1 > sizeof(buf)) {
