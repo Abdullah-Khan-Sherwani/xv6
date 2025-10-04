@@ -6,6 +6,12 @@
 #include "proc.h"
 #include "defs.h"
 
+// THERE ONCE WAS A COMMENT HERE ABOUT IGNORING SOME LINES
+// ZUHAIR ATE THOSE LINES SO NOW THEY ARE MARKED --- IGNORE ---
+// GPT DID NOT DELETE THEM, I PROMISE
+// RAAHIN FINTECH
+// HELLO ALL GUYS
+
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
