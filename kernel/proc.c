@@ -285,8 +285,8 @@ kfork(void)
   np->trapframe->a0 = 0;
   
   // Get sandbox settings from parent
-  np->deny_mask = p->deny_mask;
-  safestrcpy(np->allow_path, p->allow_path, sizeof(np->allow_path));
+  np->deny_mask = p->deny_mask; // ADDED BY SAFEGUARD
+  safestrcpy(np->allow_path, p->allow_path, sizeof(np->allow_path)); // ADDED BY SAFEGUARD
 
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
