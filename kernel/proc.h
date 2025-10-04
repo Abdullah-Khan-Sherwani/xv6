@@ -1,4 +1,6 @@
 // Saved registers for kernel context switches.
+
+#include "param.h"
 struct context {
   uint64 ra;
   uint64 sp;
@@ -105,5 +107,6 @@ struct proc {
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
 
-  uint64 deny_mask;           // ADDED BY SAFEGUARD
+  char allow_path[MAXPATH];    // ADDED: BY SAFEGUARD
+  uint64 deny_mask;           // ADDED: BY SAFEGUARD
 };

@@ -42,4 +42,4 @@ entry("getpid");
 entry("sbrk");
 entry("pause");
 entry("uptime");
-entry("interpose");
+entry("interpose"); # ADDED BY SAFEGUARD

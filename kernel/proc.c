@@ -123,7 +123,8 @@ allocproc(void)
 
 found:
   p->pid = allocpid();
-  p->deny_mask = 0; // ADDED BY SAFEGUARD
+  p->deny_mask = 0;
+  p->allow_path[0] = 0;
   p->state = USED;
 
   // Allocate a trapframe page.
@@ -170,6 +171,9 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+
+  p->deny_mask = 0; // ADDED BY SAFEGUARD
+  p->allow_path[0] = 0; // ADDED BY SAFEGUARD
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -279,8 +283,10 @@ kfork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
-
-  np->deny_mask = p->deny_mask; // ADDED BY SAFEGUARD for child
+  
+  // Get sandbox settings from parent
+  np->deny_mask = p->deny_mask;
+  safestrcpy(np->allow_path, p->allow_path, sizeof(np->allow_path));
 
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
