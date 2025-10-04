@@ -6,6 +6,12 @@
 #include "proc.h"
 #include "defs.h"
 
+// THERE ONCE WAS A COMMENT HERE ABOUT IGNORING SOME LINES
+// ZUHAIR ATE THOSE LINES SO NOW THEY ARE MARKED --- IGNORE ---
+// GPT DID NOT DELETE THEM, I PROMISE
+// RAAHIN FINTECH
+// HELLO ALL GUYS
+
 struct cpu cpus[NCPU];
 
 struct proc proc[NPROC];
@@ -123,7 +129,8 @@ allocproc(void)
 
 found:
   p->pid = allocpid();
-  p->deny_mask = 0; // ADDED BY SAFEGUARD
+  p->deny_mask = 0;
+  p->allow_path[0] = 0;
   p->state = USED;
 
   // Allocate a trapframe page.
@@ -170,6 +177,9 @@ freeproc(struct proc *p)
   p->killed = 0;
   p->xstate = 0;
   p->state = UNUSED;
+
+  p->deny_mask = 0; // ADDED BY SAFEGUARD
+  p->allow_path[0] = 0; // ADDED BY SAFEGUARD
 }
 
 // Create a user page table for a given process, with no user memory,
@@ -279,8 +289,10 @@ kfork(void)
 
   // Cause fork to return 0 in the child.
   np->trapframe->a0 = 0;
-
-  np->deny_mask = p->deny_mask; // ADDED BY SAFEGUARD for child
+  
+  // Get sandbox settings from parent
+  np->deny_mask = p->deny_mask; // ADDED BY SAFEGUARD
+  safestrcpy(np->allow_path, p->allow_path, sizeof(np->allow_path)); // ADDED BY SAFEGUARD
 
   // increment reference counts on open file descriptors.
   for(i = 0; i < NOFILE; i++)
