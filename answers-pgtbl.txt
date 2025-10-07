@@ -8,6 +8,9 @@ va 0x3FFFFFF000 maps to pa 0x80006000 with permissions 0x4B (valid, readable, ex
 Overall, the output shows that the process’s code, data, and stack occupy the low addresses, while the trapframe and trampoline occupy the top addresses of the user virtual space.
 
 Question 2
+The USYSCALL shared page could also speed up calls like getuid(), getgid(), and getppid(), since these return mostly static IDs. Also times() could benefit, as it provides frequently read but safely exposable kernel data. In general, this optimization suits read-only system calls that don’t require complex computation or frequent updates.
+
+Question 3
 0x0000000000000000 → pte 0x...5B  
   User text/code page (read + exec), permissions: V, R, X, U, A.  
   Matches print_pgtbl entry for program code.
